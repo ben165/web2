@@ -42,7 +42,7 @@ Wäre aber eher für das Spiel 4Gewinnt, denke das ist ähnlich komplex wie Tic 
 Wie wollen wir anfangen. Denke es würde Sinn machen zuerst das Frontend zu designen?
 
 
-# Update Benjamin
+# Update Benjamin (+ Antworten von Jakob)
 
 4 Gewinnt klingt gut, an das Spiel habe ich gar nicht gedacht. Du willst viele Spiele auf einmal ermoeglichen, dass ist ein Feature, aber wie du das ohne jeweils den kompletten Gamestate in der DB speichern machen willst weiss ich nicht genau. Dann willst also nur die Aenderungen uebertragen.
 
@@ -58,3 +58,21 @@ Ich glaube auch, dass Frontend am Anfang wichtiger ist. Dann bekommt man erst da
 Problem: Frontend muss man mit Vue machen? Also wir koennen das benutzen aber die Frage ist auch ob wie nicht einfach ein canvas haben das auf alles reagiert. Da ist am Ende dann nicht mehr viel Vue.js da.
 
 Hab ganz wenig Erfahrung mit Vue.js, das hilft dir halt bei so Dingen wie klicke hier oder da und faerbe dann an einer anderen Stelle den Hintergrund blau etc. Ka wie uns das so weiterhelfen soll. 
+
+# Frontend
+
+INDEX.HTML
+- Neuen Spieltisch eröffnen
+- (optional) Alle Spieltische anzeigen
+
+ANZEIGE
+- 4Gewinnt-Tabelle
+- Wer am Zug ist
+- Aufgeben/Remis/Neustart/Raum verlassen Button
+- Meldung bei Spielende
+
+DATENBANK
+| id |      url       |    gamestate     |  currentPlayer |  winner  |
+|----|----------------|------------------|----------------|----------|
+| 1  | /room/player   | "0012101..."     |      2         |     1    |
+
