@@ -40,3 +40,21 @@ Wäre aber eher für das Spiel 4Gewinnt, denke das ist ähnlich komplex wie Tic 
 # Vorgehen
 
 Wie wollen wir anfangen. Denke es würde Sinn machen zuerst das Frontend zu designen?
+
+
+# Update Benjamin
+
+4 Gewinnt klingt gut, an das Spiel habe ich gar nicht gedacht. Du willst viele Spiele auf einmal ermoeglichen, dass ist ein Feature, aber wie du das ohne jeweils den kompletten Gamestate in der DB speichern machen willst weiss ich nicht genau. Dann willst also nur die Aenderungen uebertragen.
+
+- Schliessen des Browser und wiederoeffnen geht dann nicht, da der Gamestate so ja nicht wiederhergestellt werden kann.
+- Was passiert bei kurzem Verbindungsabbruch? Ich denke der Gamestate wird ja nur einmal auf Anfrage "abgeholt" und dann aus der DB entfernt.
+- Dann ist die Spiellogik komplett im Frontend. Also wo welcher Stein faellt oder hinfallen kann. Das weiss ja unser Backend dann gar nicht weil es nur zur Uebermittlung der Daten benutzt wird.
+- Schummeln moeglich, weil man das Frontend umgehen kann. Wenn man einen Stein an eine Stelle setzt, die schon voll ist, was passiert dann am anderen Ende?
+
+## Wie anfange?
+
+Ich glaube auch, dass Frontend am Anfang wichtiger ist. Dann bekommt man erst das Gefühl, was man am Ende so alles im Backend braucht. Backend code ist vermutlich sogar einfacher zu proggen als der Frontend mit den Grafiken evt. Bewegungen.
+
+Problem: Frontend muss man mit Vue machen? Also wir koennen das benutzen aber die Frage ist auch ob wie nicht einfach ein canvas haben das auf alles reagiert. Da ist am Ende dann nicht mehr viel Vue.js da.
+
+Hab ganz wenig Erfahrung mit Vue.js, das hilft dir halt bei so Dingen wie klicke hier oder da und faerbe dann an einer anderen Stelle den Hintergrund blau etc. Ka wie uns das so weiterhelfen soll. 
