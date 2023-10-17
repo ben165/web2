@@ -35,14 +35,8 @@ Simpleres Spiel als Schiffeversenken find ich gut, dann liegt nicht soviel Fokus
 Wäre aber eher für das Spiel 4Gewinnt, denke das ist ähnlich komplex wie Tic Tac Toe, aber nicht so langweilig zu spielen.
 
 - Damit nicht nur ein Spiel stattfinden kann, sollte man einen "Raum" (also wahrscheinlich eine Route) definieren können. Damit kann ein anderer Spieler eingeladen werden, indem man ihm den Link schickt.
-- Folgender Vorschlag, damit die Datenbank nicht redundant ist: Wir halten im Backend KEINE Datenstruktur vor, die den Zusand des gesammten Spiels abbildet. Das Backend ist nur dazu da, die Datenbank zu aktualisieren und die Anfragen der Spieler zu bearbeiten. Die Gewinnbedingung checken wir nur im Frontend, wo für jeden Spieler jeweils eine Datenstruktur des Spiels existiert. Das hat den Vorteil, dass wir wenig Speicherbedarf auf dem Server haben und dieser daher theoretisch mehr Spiele gleichzeitig bearbeiten kann. (Weiß nicht wie realistisch das ist, aber dadurch hat die Datenbank jedenfalls einen Sinn)
 
-# Vorgehen
-
-Wie wollen wir anfangen. Denke es würde Sinn machen zuerst das Frontend zu designen?
-
-
-# Update Benjamin (+ Antworten von Jakob)
+# Update Benjamin
 
 4 Gewinnt klingt gut, an das Spiel habe ich gar nicht gedacht. Du willst viele Spiele auf einmal ermoeglichen, dass ist ein Feature, aber wie du das ohne jeweils den kompletten Gamestate in der DB speichern machen willst weiss ich nicht genau. Dann willst also nur die Aenderungen uebertragen.
 
@@ -59,7 +53,7 @@ Problem: Frontend muss man mit Vue machen? Also wir koennen das benutzen aber di
 
 Hab ganz wenig Erfahrung mit Vue.js, das hilft dir halt bei so Dingen wie klicke hier oder da und faerbe dann an einer anderen Stelle den Hintergrund blau etc. Ka wie uns das so weiterhelfen soll. 
 
-# Frontend
+# Besprechung 17.10
 
 INDEX.HTML
 - Neuen Spieltisch eröffnen
