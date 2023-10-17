@@ -36,3 +36,7 @@ Wäre aber eher für das Spiel 4Gewinnt, denke das ist ähnlich komplex wie Tic 
 
 - Damit nicht nur ein Spiel stattfinden kann, sollte man einen "Raum" (also wahrscheinlich eine Route) definieren können. Damit kann ein anderer Spieler eingeladen werden, indem man ihm den Link schickt.
 - Folgender Vorschlag, damit die Datenbank nicht redundant ist: Wir halten im Backend KEINE Datenstruktur vor, die den Zusand des gesammten Spiels abbildet. Das Backend ist nur dazu da, die Datenbank zu aktualisieren und die Anfragen der Spieler zu bearbeiten. Die Gewinnbedingung checken wir nur im Frontend, wo für jeden Spieler jeweils eine Datenstruktur des Spiels existiert. Das hat den Vorteil, dass wir wenig Speicherbedarf auf dem Server haben und dieser daher theoretisch mehr Spiele gleichzeitig bearbeiten kann. (Weiß nicht wie realistisch das ist, aber dadurch hat die Datenbank jedenfalls einen Sinn)
+
+# Vorgehen
+
+Wie wollen wir anfangen. Denke es würde Sinn machen zuerst das Frontend zu designen?
