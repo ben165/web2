@@ -44,7 +44,26 @@ app.post("/create", (req, res) => {
 
 app.get("/game", (req, res) => {
     //console.log(req.query)
-    res.render('status', {title: 'Game', info: "This page ist still in development. In future, a created game with the ID " + req.query.id + " will be happening here."})
+
+    console.log(req.query)
+
+    function test1(result) {
+        if (result == 0) {
+            res.render('status', {title: 'Error', info: "No game can't be found with this id."})
+        } else {
+            res.render('game', {title: 'Game', info: "Game with ID " + req.query.id + " will be happening here."})
+        }
+    }
+
+    sql = `select count(*) as amount from game where gameid = ?`
+
+    db.all(sql,[req.query.id],(err, rows) => {
+        if (err) return console.log(err.message)
+        rows.forEach(row=>{
+            amount = row.amount
+            test1(amount)
+        })
+    })
 })
 
 app.get("/about", (req, res) => {

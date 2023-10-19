@@ -1,7 +1,8 @@
 # Install
 1. clone repo
 1. use `npm install` to install all packages
-1. start server with `nodejs app.js`
+1. start server with `npm start` oder `nodejs app.js`
+1. visit http://127.0.0.1:3000/
 
 
 # Gedanken
