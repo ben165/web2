@@ -1,10 +1,12 @@
 html {
     max-width: 70ch;
-    padding: 3em 1em;
+    padding: 1em 1em;
     margin: auto;
-    line-height: 1.75;
+    line-height: 1.25;
     font-size: 1em;
 }
 table, th, td {
     border: 1px solid black;
   }
+  
+button.gameButtonClass {width:50px;height:50px;}
