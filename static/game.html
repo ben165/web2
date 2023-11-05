@@ -1,0 +1,91 @@
+<%- include('./partials/head.ejs') %>
+
+<%- include('./partials/nav.ejs') %>
+
+
+<h3>Allgemeine Infos</h3>
+GameID: <%=gameid%><br>
+Player: <%=player%>
+
+
+<h3>Game Board</h3>
+<div id="playerField"></div>
+
+<script>
+function createBoard() {
+    str = ""
+    for (i=0; i<8; i++) {
+        for (j=0; j<8; j++) {
+            name = "b" + (8*i + j).toString()
+            str += '<button id="'+ name +'" name="gameButton" class="gameButtonClass"> </button>'
+        }
+    str += "<br>\n"
+    }
+    //console.log(str)
+    document.getElementById("playerField").innerHTML = str
+    var refreshField = setInterval(checkChange, 500);
+}
+
+async function getGameData() {
+    const response = await fetch("/gameinfo/%<=gameid>%");
+    const gameData = await response.json();
+
+    // update spielfeld
+}
+
+
+function checkChange() {
+    gameid = "<%=gameid%>"
+    fetch("/gameinfo/" + gameid)
+    .then((response) => response.json())
+    .then((state) => updateField(state))
+}
+
+function updateField(state) {
+    for (i=0; i<state.length; i++) {
+        if (state[i] == 1) {
+            document.getElementById("b"+Number(i)).innerHTML = "X"
+        } else if (state[i] == 2) {
+            document.getElementById("b"+Number(i)).innerHTML = "O"
+        }
+    }
+}
+
+
+</script>
+
+
+<script>
+    player = <%=player%>
+    gameid = "<%=gameid%>"
+
+    createBoard()
+    const playerField = document.getElementById('playerField');
+
+    playerField.addEventListener('click', (event) => {
+    const isButton = event.target.nodeName === 'BUTTON';
+    if (!isButton) {
+        return;
+    }
+
+    nr = event.target.id
+    nr = Number(nr.substring(1,nr.length))
+
+    fetch("/makeMove",{
+    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+    method: "POST",
+    body: JSON.stringify({pos: nr, player, gameid })
+    })
+})
+
+</script>
+
+
+
+<p id="debug"></p>
+
+
+
+
+
+<%- include('./partials/tail.ejs') %>
