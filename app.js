@@ -49,6 +49,24 @@ app.post("/create", (req, res) => {
     res.render('status', {title: 'Info', info: req.body.gameid + " created."})
 })
 
+
+
+
+app.get("/cancel", (req, res) => {
+    emptySet = "0000000000000000000000000000000000000000000000000000000000000000"
+    //gameid = req.body.gameid // not needed cause there is only one game...
+
+    sql = `UPDATE game SET state = ?, current = ?, winner = ? WHERE gameid = "123"`
+
+    db.run(sql,[emptySet, 0, 0],(err) => {
+        if (err) return console.log(err.message)
+        else return res.json({title: 'Info', info: 'Game reset'})
+    })
+})
+
+
+
+
 app.get("/game", (req, res) => {
     //console.log(req.query)
 
@@ -98,8 +116,11 @@ app.get("/gameinfo/:gameid", (req, res) => {
 app.post("/makeMove", (req, res) => {
     move = req.body
 
+    console.log(move)
+
     pos = req.body.pos
     player = req.body.player
+    console.log(typeof(player))
     gameid = req.body.gameid
 
     sql = `select state from game where gameid = ?`
