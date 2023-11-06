@@ -9,8 +9,7 @@
 <a href="/">Back</a><br>
 <button onclick="resetGame()">Reset Game</button> 
 <h3>Allgemeine Infos</h3>
-GameID: "123"<br>
-Player: 1
+<p id="info"></p>
 
 
 <h3>Game Board</h3>
@@ -84,6 +83,7 @@ function updateField(state) {
     var player = urlParams.get("player") 
     var gameid = "123" //TODO not important anymore?
 
+    document.getElementById("info").innerHTML = "Player: " + player
 
     createBoard()
     const playerField = document.getElementById('playerField');
