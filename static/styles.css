@@ -6,7 +6,15 @@ html {
     font-size: 1em;
 }
 table, th, td {
-    border: 1px solid black;
-  }
-  
+    padding: 10px;
+}
+
+img {
+  border: 5px solid #b5b2b2;
+}
+
+img:hover {
+  border-color: rgb(208, 11, 208);
+}
+
 button.gameButtonClass {width:50px;height:50px;}

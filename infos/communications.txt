@@ -20,5 +20,6 @@ BACK TO FRONT
 	currentPlayer: 1|2
 	moveOptions: string (0,1)
 	winner: 0|1|2|3
+	gameid: "123"
 }
 

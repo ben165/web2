@@ -54,9 +54,9 @@ app.get("/game", (req, res) => {
 
     //console.log(req.query)
 
-    sql = `select count(*) as amount from game where gameid = ?`
+    sql = `select count(*) as amount from game where gameid = ${req.query.id}`
 
-    db.all(sql,[req.query.id],(err, rows) => {
+    db.all(sql,[],(err, rows) => {
         if (err) return console.log(err.message)
         rows.forEach(row=>{
             amount = row.amount

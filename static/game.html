@@ -1,11 +1,14 @@
-<%- include('./partials/head.ejs') %>
-
-<%- include('./partials/nav.ejs') %>
+<!doctype html>
+<head>
+    <title>Reversi</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
 
 
 <h3>Allgemeine Infos</h3>
-GameID: <%=gameid%><br>
-Player: <%=player%>
+GameID: "123"<br>
+Player: 1
 
 
 <h3>Game Board</h3>
@@ -23,11 +26,11 @@ function createBoard() {
     }
     //console.log(str)
     document.getElementById("playerField").innerHTML = str
-    var refreshField = setInterval(checkChange, 500);
+    var refreshField = setInterval(checkChange, 1000);
 }
 
 async function getGameData() {
-    const response = await fetch("/gameinfo/%<=gameid>%");
+    const response = await fetch("/gameinfo/" + gameid);
     const gameData = await response.json();
 
     // update spielfeld
@@ -35,7 +38,6 @@ async function getGameData() {
 
 
 function checkChange() {
-    gameid = "<%=gameid%>"
     fetch("/gameinfo/" + gameid)
     .then((response) => response.json())
     .then((state) => updateField(state))
@@ -56,8 +58,12 @@ function updateField(state) {
 
 
 <script>
-    player = <%=player%>
-    gameid = "<%=gameid%>"
+    const urlParams = new URLSearchParams(window.location.search);
+
+    //TODO check if number is 1 or 2????
+    var player = urlParams.get("player") 
+    var gameid = "123" //TODO not important anymore?
+
 
     createBoard()
     const playerField = document.getElementById('playerField');
@@ -88,4 +94,6 @@ function updateField(state) {
 
 
 
-<%- include('./partials/tail.ejs') %>
+</body>
+</html>
+
