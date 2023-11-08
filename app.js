@@ -4,6 +4,8 @@ const sqlite3 = require('sqlite3')
 const express = require('express')
 const app = express();
 
+debugDB = {};
+
 //import {State} from 'helper.js'
 
 //console.log(__dirname)
@@ -23,7 +25,7 @@ app.use(express.json()) // allow json requests
 
 
 // DATABASE
-const db = new sqlite3.Database('./games.db', sqlite3.OPEN_READWRITE, (err) => {
+const db = new sqlite3.Database('./game.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) return console.error(err.message)
 })
 
@@ -34,42 +36,72 @@ app.get("/", (req, res) => {
 
 
 app.get("/create", (req, res) => {
-    //console.log(req.body)
-
-    // Hier fehlen Abfragen:
-    // - Check if string cointains only numbers and small characters
-    // - Check if gameid is greater than 3
-    // - Check if gameid is already taken
 
     emptySet = "0000000000000000000000000001200000021000000000000000000000000000"
 
     let state = new State(0,1,emptySet);
     let moveSet = state.moveStr()
 
-    console.log(moveSet)
-
     let counter = state.turn
     let player = state.player
 
-    gameid = req.body.gameid
-
-    sql = `insert into game(gameid, state, current, winner, moveStr, counter) values (?,?,?,?,?,?)`
+    sql = `UPDATE game SET state = ?, current = ?, winner = ?, moveStr = ?, counter = ? WHERE gameid = 1`
     
-    db.run(sql,["game02", emptySet, player, 0, moveSet, counter],(err) => {
+    db.run(sql,[emptySet, player, 0, moveSet, counter],(err) => {
         if (err) return console.log(err.message)
     })
 
-    res.render('status', {title: 'Info', info: req.body.gameid + " created."})
+    res.json({title: 'Info', info: 'Empty Game field created'})
 })
 
 
+app.get("/debugDB", (req, res) => {
 
+    sql = `Select state, current, winner, moveStr, counter from game WHERE gameid = 1`
+
+    var rowDB;
+    db.all(sql,[req.params.gameid],(err, rows) => {
+        if (err) return res.json({"status": 0})
+        rows.forEach(row=>{
+            console.log(row)
+            debugDB = row
+        })
+        res.json(debugDB)
+    })
+})
+
+app.get("/resetDB", (req, res) => {
+
+sql1 = `drop table if exists game;`
+sql2 = `CREATE TABLE "game" (
+    	"id"	INTEGER,
+    	"gameid"	INTEGER UNIQUE,
+    	"state"	TEXT,
+    	"current"	INTEGER,
+    	"winner"	INTEGER,
+    	"moveStr"	TEXT,
+    	"counter"	INTEGER,
+    	PRIMARY KEY("id")
+    );`
+sql3 = `insert into game (gameid) values (?)`
+    
+    db.run(sql1,[],(err) => {
+        if (err) return console.log(err.message)
+        db.run(sql2,[],(err) => {
+            if (err) return console.log(err.message)
+            db.run(sql3,[1],(err) => {
+                if (err) return console.log(err.message)
+                res.json({title: 'Info', info: 'Database deleted, created again and filles with gameid = 1.'})
+            })
+        })
+    })
+})
 
 app.get("/cancel", (req, res) => {
     emptySet = "0000000000000000000000000000000000000000000000000000000000000000"
     //gameid = req.body.gameid // not needed cause there is only one game...
 
-    sql = `UPDATE game SET state = ?, current = ?, winner = ? WHERE gameid = "game01"`
+    sql = `UPDATE game SET state = ?, current = ?, winner = ? WHERE gameid = 1`
 
     db.run(sql,[emptySet, 0, 0],(err) => {
         if (err) return console.log(err.message)
@@ -81,10 +113,6 @@ app.get("/cancel", (req, res) => {
 
 
 app.get("/game", (req, res) => {
-    //console.log(req.query)
-
-    //console.log(req.query)
-
     sql = `select count(*) as amount from game where gameid = ${req.query.id}`
 
     db.all(sql,[],(err, rows) => {
@@ -103,20 +131,15 @@ app.get("/game", (req, res) => {
             res.render('game', {title: 'Game', gameid: req.query.id, player: req.query.player})
         }
     }
-
-
-})
-
-app.get("/about", (req, res) => {
-    res.render('about', {title: 'About us'})
 })
 
 
-app.get("/gameinfo/:gameid", (req, res) => {
+app.get("/gameinfo", (req, res) => {
+    // Polling happens every second
 
-    sql = `select state from game where gameid = ?`
+    sql = `select state from game where gameid = 1`
 
-    db.all(sql,[req.params.gameid],(err, rows) => {
+    db.all(sql,[],(err, rows) => {
         if (err) return res.json({"status": 0})
         rows.forEach(row=>{
             state = row.state
@@ -144,7 +167,7 @@ app.post("/makeMove", (req, res) => {
     playerMove = req.body.move
     playerId = req.body.player
 
-    sql = `select state, moveStr, current, counter from game where gameid like "game02"`
+    sql = `select state, moveStr, current, counter from game where gameid = 1`
 
     db.all(sql,[],(err, rows) => {
         if (err) return console.log(err.message)
@@ -154,9 +177,9 @@ app.post("/makeMove", (req, res) => {
             let moveStrDb = row.moveStr
             let counterDb = row.counter
 
-            console.log(playerDb, playerId, moveStrDb[playerMove], 1)
+            console.log("playerDb: ", playerDb, "playerId: ", playerId, "moveStrDb[playerMove]: ", moveStrDb[playerMove])
             if (playerDb === playerId && moveStrDb[playerMove] === "1") {
-                console.log("HEEERE")
+                console.log("Zug war in Ordnung.")
                 let state = new State(counterDb, playerDb, stateDb)
                 state.makeMove(playerMove)
                 let newMoveStr = state.moveStr()
@@ -166,7 +189,7 @@ app.post("/makeMove", (req, res) => {
                 
                 console.log(newState)
 
-                sql = `update game set moveStr = ?, state = ?, current = ?, counter = ? where gameid like "game02"`
+                sql = `update game set moveStr = ?, state = ?, current = ?, counter = ? where gameid = 1`
                 db.run(sql, [newMoveStr, newState, newPlayer, newCounter], (err) => {
                     if (err) return console.log(err.message)
                 })
