@@ -27,19 +27,12 @@ function createBoard() {
     }
     //console.log(str)
     document.getElementById("playerField").innerHTML = str
-    var refreshField = setInterval(checkChange, 2500);
+    var refreshField = setInterval(checkChange, 1000);
 }
 
 
 function resetGame() {
-    //fetch("/cancel",{
-    //headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
-    //method: "POST",
-    //body: JSON.stringify({pos: nr, player, gameid})
-    //})
-
-    //text
-    fetch("/cancel")
+    fetch("/create")
     //.then((response) => console.log(response))
     .then((response) => response.json())
     .then(checkChange())

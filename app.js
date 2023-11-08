@@ -59,7 +59,6 @@ app.get("/debugDB", (req, res) => {
 
     sql = `Select state, current, winner, moveStr, counter from game WHERE gameid = 1`
 
-    var rowDB;
     db.all(sql,[req.params.gameid],(err, rows) => {
         if (err) return res.json({"status": 0})
         rows.forEach(row=>{
@@ -94,18 +93,6 @@ sql3 = `insert into game (gameid) values (?)`
                 res.json({title: 'Info', info: 'Database deleted, created again and filles with gameid = 1.'})
             })
         })
-    })
-})
-
-app.get("/cancel", (req, res) => {
-    emptySet = "0000000000000000000000000000000000000000000000000000000000000000"
-    //gameid = req.body.gameid // not needed cause there is only one game...
-
-    sql = `UPDATE game SET state = ?, current = ?, winner = ? WHERE gameid = 1`
-
-    db.run(sql,[emptySet, 0, 0],(err) => {
-        if (err) return console.log(err.message)
-        else return res.json({title: 'Info', info: 'Game reset'})
     })
 })
 
