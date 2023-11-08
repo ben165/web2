@@ -46,17 +46,11 @@ function resetGame() {
 }
 
 function checkChange() {
-    fetch("/gameinfo/" + gameid)
+    fetch("/gameinfo")
     .then((response) => response.json())
     .then((state) => updateField(state))
 }
 
-async function getGameData() {
-    const response = await fetch("/gameinfo/" + gameid);
-    const gameData = await response.json();
-
-    // update spielfeld
-}
 
 function updateField(state) {
     for (i=0; i<state.length; i++) {
@@ -80,9 +74,7 @@ function updateField(state) {
     const urlParams = new URLSearchParams(window.location.search);
 
     //TODO check if number is 1 or 2????
-    var player = urlParams.get("player") 
-    var gameid = "123" //TODO not important anymore?
-
+    var player = Number(urlParams.get("player"))
     document.getElementById("info").innerHTML = "Player: " + player
 
     createBoard()
@@ -94,14 +86,15 @@ function updateField(state) {
         return;
     }
 
-    nr = event.target.id
-    nr = Number(nr.substring(1,nr.length))
+    move = event.target.id
+    move = Number(move.substring(1,move.length))
 
     fetch("/makeMove",{
     headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
     method: "POST",
-    body: JSON.stringify({pos: nr, player, gameid })
+    body: JSON.stringify({player, move})
     })
+
 })
 
 </script>
