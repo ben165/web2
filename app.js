@@ -42,7 +42,7 @@ app.get("/create", (req, res) => {
 
     let emptySet = "0000000000000000000000000001200000021000000000000000000000000000"
 
-    let state = new State(0, 1, emptySet);
+    let state = new State(1, 1, emptySet);
     let moveSet = state.moveStr()
 
     let counter = state.turn
@@ -127,13 +127,16 @@ app.get("/game", (req, res) => {
 app.get("/gameinfo", (req, res) => {
     // Polling happens every second
 
-    const sql = `select state from game where gameid = 1`
+    const sql = `select state, current, counter from game where gameid = 1`
 
     db.all(sql, [], (err, rows) => {
         if (err) return res.json({ "status": 0 })
         rows.forEach(row => {
-            let state = row.state
-            return res.json(state)
+            return res.json({
+                turn: row.counter,
+                player: row.current,
+                boardStr: row.state
+            })
         })
     })
 })
