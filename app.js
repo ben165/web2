@@ -41,16 +41,25 @@ app.get("/create", (req, res) => {
     res.json({ title: 'Info', info: 'Empty Game field created' })
 })
 
-/*
-Route Cancel
 
+
+app.get("/cancel", (req, res) => {
+/*
 {
     player: 1|2
 }
- --> cancel
+
+// TODO: DB Communication and Logic
+
+cancel in db:
+00 = init state
+01 = player 1 want to quit
+10 = player 2 want to quit
+11 = both players want to quit, run route /create
 
 
 */
+})
 
 
 app.get("/resetDB", (req, res) => {
@@ -104,18 +113,11 @@ app.get("/gameinfo", (req, res) => {
 
 app.post("/makeMove", (req, res) => {
 
-    /*
-    {
+    
+    /*{
         "player": 1,
         "move": 30
-    }
-    
-    Von Datenbank:
-    - state (boardStr)
-    - moveStr (was erlaubt ist)
-    - currentPlayer, db: current
-    - game02
-    */
+    }*/
 
     const playerMove = req.body.move
     const playerId = req.body.player

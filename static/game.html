@@ -46,10 +46,11 @@ function checkChange() {
 
 
 function updateField(state) {
-    for (i=0; i<state.length; i++) {
-        if (state[i] == 1) {
+    boardStr = state.boardStr
+    for (i=0; i<boardStr.length; i++) {
+        if (boardStr[i] == 1) {
             document.getElementById("b"+Number(i)).innerHTML = "X"
-        } else if (state[i] == 2) {
+        } else if (boardStr[i] == 2) {
             document.getElementById("b"+Number(i)).innerHTML = "O"
         } else {
             document.getElementById("b"+Number(i)).innerHTML = ""
