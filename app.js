@@ -6,14 +6,7 @@ import express from 'express'
 import cors from 'cors';
 const app = express();
 
-let debugDB = {};
-
-//import {State} from 'helper.js'
-
-//console.log(__dirname)
-
-// OPTIONS
-app.set('view engine', 'ejs') // register view engine
+var debugDB = {};
 
 // MIDDLEWARE
 app.use((req, res, next) => {
@@ -23,7 +16,7 @@ app.use((req, res, next) => {
 app.use(express.static('static')) // static folder
 app.use(express.urlencoded({ extended: true })) // post request
 app.use(express.json()) // allow json requests
-app.use(cors());
+app.use(cors()); // TODO: Rausnehmen beim deployen
 
 
 
@@ -33,44 +26,32 @@ const db = new sqlite3.Database('./game.db', sqlite3.OPEN_READWRITE, (err) => {
 })
 
 
-app.get("/", (req, res) => {
-    res.render('index', { title: 'Startpage' })
-})
-
-
 app.get("/create", (req, res) => {
 
-    let emptySet = "0000000000000000000000000001200000021000000000000000000000000000"
+    let emptyBoardStr = "0000000000000000000000000001200000021000000000000000000000000000"
 
-    let state = new State(1, 1, emptySet);
-    let moveSet = state.moveStr()
+    let state = new State(1, 1, emptyBoardStr);
 
-    let counter = state.turn
-    let player = state.player
+    let sql = `UPDATE game SET boardStr = ?, player = ?, winner = ?, moveStr = ?, turn = ?, cancel = ? WHERE gameid = 1`
 
-    let sql = `UPDATE game SET state = ?, current = ?, winner = ?, moveStr = ?, counter = ? WHERE gameid = 1`
-
-    db.run(sql, [emptySet, player, 0, moveSet, counter], (err) => {
+    db.run(sql, [emptyBoardStr, state.player, 0, state.moveStr(), state.turn, 0], (err) => {
         if (err) return console.log(err.message)
     })
 
     res.json({ title: 'Info', info: 'Empty Game field created' })
 })
 
+/*
+Route Cancel
 
-app.get("/debugDB", (req, res) => {
+{
+    player: 1|2
+}
+ --> cancel
 
-    const sql = `Select state, current, winner, moveStr, counter from game WHERE gameid = 1`
 
-    db.all(sql, [req.params.gameid], (err, rows) => {
-        if (err) return res.json({ "status": 0 })
-        rows.forEach(row => {
-            console.log(row)
-            debugDB = row
-        })
-        res.json(debugDB)
-    })
-})
+*/
+
 
 app.get("/resetDB", (req, res) => {
 
@@ -78,15 +59,17 @@ app.get("/resetDB", (req, res) => {
     const sql2 = `CREATE TABLE "game" (
     	"id"	INTEGER,
     	"gameid"	INTEGER UNIQUE,
-    	"state"	TEXT,
-    	"current"	INTEGER,
+    	"boardStr"	TEXT,
+    	"player"	INTEGER,
     	"winner"	INTEGER,
     	"moveStr"	TEXT,
-    	"counter"	INTEGER,
+    	"turn"	INTEGER,
+        "cancel"    INTEGER,
     	PRIMARY KEY("id")
     );`
-    const sql3 = `insert into game (gameid) values (?)`
 
+    // Create one playing field with gameid = 1
+    const sql3 = `insert into game (gameid) values (?)`
     db.run(sql1, [], (err) => {
         if (err) return console.log(err.message)
         db.run(sql2, [], (err) => {
@@ -102,40 +85,17 @@ app.get("/resetDB", (req, res) => {
 
 
 
-app.get("/game", (req, res) => {
-    const sql = `select count(*) as amount from game where gameid = ${req.query.id}`
-
-    db.all(sql, [], (err, rows) => {
-        if (err) return console.log(err.message)
-        rows.forEach(row => {
-            amount = row.amount
-            test1(amount)
-        })
-    })
-
-
-    function test1(result) {
-        if (result == 0) {
-            res.render('status', { title: 'Error', info: "No game can't be found with this id." })
-        } else {
-            res.render('game', { title: 'Game', gameid: req.query.id, player: req.query.player })
-        }
-    }
-})
-
-
 app.get("/gameinfo", (req, res) => {
-    // Polling happens every second
-
-    const sql = `select state, current, counter from game where gameid = 1`
+    const sql = `select boardStr, player, turn, winner, cancel from game where gameid = 1`
 
     db.all(sql, [], (err, rows) => {
-        if (err) return res.json({ "status": 0 })
+        if (err) return res.json({ "status": "error getting game info" })
         rows.forEach(row => {
             return res.json({
-                turn: row.counter,
-                player: row.current,
-                boardStr: row.state
+                turn: row.turn,
+                player: row.player,
+                boardStr: row.boardStr,
+                cancel: row.cancel
             })
         })
     })
@@ -160,30 +120,28 @@ app.post("/makeMove", (req, res) => {
     const playerMove = req.body.move
     const playerId = req.body.player
 
-    const sql = `select state, moveStr, current, counter from game where gameid = 1`
+    const sql = `select boardStr, moveStr, player, turn from game where gameid = 1`
 
     db.all(sql, [], (err, rows) => {
         if (err) return console.log(err.message)
         rows.forEach(row => {
-            let stateDb = row.state
-            let playerDb = row.current
+            let boardStrDb = row.boardStr
+            let playerDb = row.player
             let moveStrDb = row.moveStr
-            let counterDb = row.counter
+            let turnDb = row.turn
 
             console.log("playerDb: ", playerDb, "playerId: ", playerId, "moveStrDb[playerMove]: ", moveStrDb[playerMove])
             if (playerDb === playerId && moveStrDb[playerMove] === "1") {
                 console.log("Zug war in Ordnung.")
-                let state = new State(counterDb, playerDb, stateDb)
+                let state = new State(turnDb, playerDb, boardStrDb)
                 state.makeMove(playerMove)
                 let newMoveStr = state.moveStr()
-                let newState = state.boardStr
+                let newBoardStr = state.boardStr
                 let newPlayer = state.player
-                let newCounter = counterDb + 1
+                let newTurn = turnDb + 1
 
-                console.log(newState)
-
-                const sql = `update game set moveStr = ?, state = ?, current = ?, counter = ? where gameid = 1`
-                db.run(sql, [newMoveStr, newState, newPlayer, newCounter], (err) => {
+                const sql = `update game set moveStr = ?, boardStr = ?, player = ?, turn = ? where gameid = 1`
+                db.run(sql, [newMoveStr, newBoardStr, newPlayer, newTurn], (err) => {
                     if (err) return console.log(err.message)
                 })
             }
@@ -194,20 +152,24 @@ app.post("/makeMove", (req, res) => {
 
 
 
-app.get("/jsonReturn", (req, res) => {
-    const a = { "name": "benjamin", "age": 12 }
-    res.json(a)
+app.get("/debugDB", (req, res) => {
+
+    const sql = `Select boardStr, player, winner, moveStr, turn, cancel from game WHERE gameid = 1`
+
+    db.all(sql, [req.params.gameid], (err, rows) => {
+        if (err) return res.json({ "status": "Error executing debug sql" })
+        rows.forEach(row => {
+            debugDB = row
+        })
+        res.json(debugDB)
+    })
 })
 
 
-app.post("/receiveJson", (req, res) => {
-    console.log(req.body)
-    res.send("Hello where is JSON????")
-})
 
 
 app.use((req, res) => {
-    res.status(404).render('404', { title: 'Page not found' })
+    res.status(404).send("<h2>Error</h2><p>Page not found</p>")
 })
 
 
