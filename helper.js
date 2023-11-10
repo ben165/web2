@@ -1,5 +1,10 @@
 const n = 8;
 
+const EMPTY = 0;
+const BLACK = 1;
+const WHITE = 2;
+const DRAW = 3;
+
 export class BoardElement {
     constructor(x, y, stone) {
         this.x = x;
@@ -22,11 +27,57 @@ export class State {
         this.boardStr = boardStr;
         this.player = player; // 1 oder 2
         this.turn = turn;
+        this.winner = 0;
         this.board = [];
         for (let i = 0; i < n * n; i++) {
             this.board.push(new BoardElement(i % 8, (i - i % 8) / 8, Number(this.boardStr[i])))
         }
+        this.calculateAttributes();
+    }
+
+    calculateAttributes(){
         this.setPossibleFlips();
+        this.setWinner();
+    }
+
+    setWinner(){
+        if (this.skipNecessary()) {
+            this.player = this.otherPlayer();
+            this.setPossibleFlips();
+            if (this.skipNecessary()) {
+                debugger;
+                let stones = this.board.map(x => x.stone);
+                const filterReduce = (stoneColor) => { return stones.filter(x => x === stoneColor).reduce((previous, current) => previous + 1, 0) };
+                let black = filterReduce(BLACK);
+                let white = filterReduce(WHITE);
+                if (black > white) this.winner = BLACK;
+                else if (black === white) this.winner = DRAW;
+                else this.winner = WHITE;
+            }
+        }
+    }
+
+    skipNecessary(){
+        for (let i = 0; i < this.board.length; i++) {
+            if (this.board[i].flips.length !== 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    update(turn, player, newBoardStr) {
+        if (this.player !== player || this.boardStr != newBoardStr) {
+            for (let i = 0; i < n * n; i++) {
+                if (this.boardStr[i] !== newBoardStr[i]) {
+                    this.board[i].stone = Number(newBoardStr[i]);
+                }
+            }
+            this.turn = turn;
+            this.player = player;
+            this.boardStr = newBoardStr;
+            this.calculateAttributes();
+        }
     }
 
     moveStr() {
@@ -44,14 +95,14 @@ export class State {
         if (flips.length > 0) {
             let newBoardStr = Array.from(this.boardStr);
             for (let i = 0; i < flips.length; i++) {
-                newBoardStr[flips[i]] = this.player;
+                newBoardStr[flips[i]] = String(Number(this.player));
                 this.board[flips[i]].stone = this.player;
                 this.board[flips[i]].flips = [];
             }
             this.boardStr = newBoardStr.join("");
             this.player = this.otherPlayer();
             this.turn += 1;
-            this.setPossibleFlips();
+            this.calculateAttributes();
         }   
     }
 
@@ -107,6 +158,6 @@ export class State {
     }
 
     otherPlayer() {
-        return this.player === 1 ? 2 : 1;
+        return this.player === BLACK ? WHITE : BLACK;
     }
 }
