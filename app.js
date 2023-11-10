@@ -43,22 +43,30 @@ app.get("/create", (req, res) => {
 
 
 
-app.get("/cancel", (req, res) => {
-/*
-{
-    player: 1|2
-}
+app.post("/cancel", (req, res) => {
+    /*{
+        player: 1|2
+    }*/
 
-// TODO: DB Communication and Logic
-
-cancel in db:
-00 = init state
-01 = player 1 want to quit
-10 = player 2 want to quit
-11 = both players want to quit, run route /create
-
-
-*/
+    const playerId = req.body.player
+    const sql = `Select cancel from game WHERE gameid = 1`
+    db.all(sql,[],(err, rows) => {
+        if (err) return res.json({"status": 0})
+        rows.forEach(row=>{
+            let cancelDB = row.cancel
+            cancelDB |= playerId
+                const sql = `UPDATE game SET cancel = ? WHERE gameid = 1`
+                db.run(sql,[cancelDB],(err) => {
+                    if (err) return console.log(err.message)
+                })
+            res.json({cancel: cancelDB })
+        })
+    })
+//cancel in db:
+//00 = init state
+//01 = player 1 want to quit
+//10 = player 2 want to quit
+//11 = both players want to quit, run route /create
 })
 
 
@@ -98,7 +106,7 @@ app.get("/gameinfo", (req, res) => {
     const sql = `select boardStr, player, turn, winner, cancel from game where gameid = 1`
 
     db.all(sql, [], (err, rows) => {
-        if (err) return res.json({ "status": "error getting game info" })
+        if (err) console.log(err.message)
         rows.forEach(row => {
             return res.json({
                 turn: row.turn,
@@ -113,17 +121,15 @@ app.get("/gameinfo", (req, res) => {
 
 app.post("/makeMove", (req, res) => {
 
-    
     /*{
         "player": 1,
         "move": 30
     }*/
-
+    
     const playerMove = req.body.move
     const playerId = req.body.player
 
     const sql = `select boardStr, moveStr, player, turn from game where gameid = 1`
-
     db.all(sql, [], (err, rows) => {
         if (err) return console.log(err.message)
         rows.forEach(row => {
@@ -131,25 +137,23 @@ app.post("/makeMove", (req, res) => {
             let playerDb = row.player
             let moveStrDb = row.moveStr
             let turnDb = row.turn
-
-            console.log("playerDb: ", playerDb, "playerId: ", playerId, "moveStrDb[playerMove]: ", moveStrDb[playerMove])
             if (playerDb === playerId && moveStrDb[playerMove] === "1") {
-                console.log("Zug war in Ordnung.")
                 let state = new State(turnDb, playerDb, boardStrDb)
                 state.makeMove(playerMove)
                 let newMoveStr = state.moveStr()
                 let newBoardStr = state.boardStr
                 let newPlayer = state.player
                 let newTurn = turnDb + 1
-
                 const sql = `update game set moveStr = ?, boardStr = ?, player = ?, turn = ? where gameid = 1`
                 db.run(sql, [newMoveStr, newBoardStr, newPlayer, newTurn], (err) => {
                     if (err) return console.log(err.message)
+                    res.json({"ok": 1 })
                 })
+            } else {
+                res.json({"ok": -1 })
             }
         })
     })
-    res.json({ "ok": 1 })
 })
 
 
