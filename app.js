@@ -26,8 +26,7 @@ const db = new sqlite3.Database('./game.db', sqlite3.OPEN_READWRITE, (err) => {
 })
 
 
-app.get("/create", (req, res) => {
-
+function clearDatabase() {
     let emptyBoardStr = "0000000000000000000000000001200000021000000000000000000000000000"
 
     let state = new State(1, 1, emptyBoardStr);
@@ -37,6 +36,12 @@ app.get("/create", (req, res) => {
     db.run(sql, [emptyBoardStr, state.player, 0, state.moveStr(), state.turn, 0], (err) => {
         if (err) return console.log(err.message)
     })
+}
+
+
+app.get("/create", (req, res) => {
+
+    clearDatabase();
 
     res.json({ title: 'Info', info: 'Empty Game field created' })
 })
@@ -50,23 +55,31 @@ app.post("/cancel", (req, res) => {
 
     const playerId = req.body.player
     const sql = `Select cancel from game WHERE gameid = 1`
-    db.all(sql,[],(err, rows) => {
-        if (err) return res.json({"status": 0})
-        rows.forEach(row=>{
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.json({ "status": 0 })
+        rows.forEach(row => {
             let cancelDB = row.cancel
             cancelDB |= playerId
+            console.log(playerId);
+            if (cancelDB === 3) {
+                clearDatabase();
+            } else {
+                if (playerId === 0) {
+                    cancelDB = 0;
+                }
                 const sql = `UPDATE game SET cancel = ? WHERE gameid = 1`
-                db.run(sql,[cancelDB],(err) => {
+                db.run(sql, [cancelDB], (err) => {
                     if (err) return console.log(err.message)
                 })
-            res.json({cancel: cancelDB })
+            }
+            res.json({ cancel: cancelDB })
         })
     })
-//cancel in db:
-//00 = init state
-//01 = player 1 want to quit
-//10 = player 2 want to quit
-//11 = both players want to quit, run route /create
+    //cancel in db:
+    //00 = init state
+    //01 = player 1 want to quit
+    //10 = player 2 want to quit
+    //11 = both players want to quit, run route /create
 })
 
 
@@ -125,7 +138,7 @@ app.post("/makeMove", (req, res) => {
         "player": 1,
         "move": 30
     }*/
-    
+
     const playerMove = req.body.move
     const playerId = req.body.player
 
@@ -147,10 +160,10 @@ app.post("/makeMove", (req, res) => {
                 const sql = `update game set moveStr = ?, boardStr = ?, player = ?, turn = ? where gameid = 1`
                 db.run(sql, [newMoveStr, newBoardStr, newPlayer, newTurn], (err) => {
                     if (err) return console.log(err.message)
-                    res.json({"ok": 1 })
+                    res.json({ "ok": 1 })
                 })
             } else {
-                res.json({"ok": -1 })
+                res.json({ "ok": -1 })
             }
         })
     })
