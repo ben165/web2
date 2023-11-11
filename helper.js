@@ -42,7 +42,7 @@ export class State {
 
     setWinner(){
         if (this.skipNecessary()) {
-            this.player = this.otherPlayer();
+            this.player = otherPlayer(this.player);
             this.setPossibleFlips();
             if (this.skipNecessary()) {
                 debugger;
@@ -100,7 +100,7 @@ export class State {
                 this.board[flips[i]].flips = [];
             }
             this.boardStr = newBoardStr.join("");
-            this.player = this.otherPlayer();
+            this.player = otherPlayer(this.player);
             this.turn += 1;
             this.calculateAttributes();
         }   
@@ -156,8 +156,8 @@ export class State {
             return (n * newY + newX);
         }
     }
+}
 
-    otherPlayer() {
-        return this.player === BLACK ? WHITE : BLACK;
-    }
+export function otherPlayer(player) {
+    return player === BLACK ? WHITE : BLACK;
 }
