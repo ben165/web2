@@ -3,7 +3,7 @@
 import { State, otherPlayer } from './helper.js';
 import sqlite3 from 'sqlite3';
 import express from 'express'
-//import cors from 'cors';
+import cors from 'cors';
 const app = express();
 
 let debugDB = {};
@@ -16,7 +16,7 @@ app.use((req, res, next) => {
 app.use(express.static('dist')) // static folder
 app.use(express.urlencoded({ extended: true })) // post request
 app.use(express.json()) // allow json requests
-//app.use(cors());
+app.use(cors());
 
 const emptyBoardStr = "0000000000000000000000000001200000021000000000000000000000000000";
 const SEC10 = 10000;
@@ -268,13 +268,17 @@ app.get("/exampleDB", (req, res) => {
     const example = Number(req.query.example);
 
     const e1 = { "boardStr": "1111111101111111111111112111111122121111212222112222222122222220", "player": 1, "winner": 0, "moveStr": "0000000000000000000000000000000000000000000000000000000000000001", "turn": 59, "cancel": 0, "player1": 1, "player2": 2 };
+    const e2 = { "boardStr": "0000000000000000000000000000000000000000000000001111111122222222", "player": 2, "winner": 0, "moveStr": "0000000000000000000000000000000000000000111111110000000000000000", "turn": 1, "cancel": 0, "player1": 1, "player2": 2 };
+
     const sql = `UPDATE game SET boardStr = ?, player = ?, winner = ?, moveStr = ?, turn = ?, cancel = ?, player1 = ?, player2 = ? WHERE gameid = ?`
 
-    if (example == 1) {
-        db.run(sql,[e1.boardStr, e1.player, e1.winner, e1.moveStr, e1.turn, e1.cancel, e1.player1, e1.player2, gameId],(err) => {
+    let exec = (e1) => { db.run(sql,[e1.boardStr, e1.player, e1.winner, e1.moveStr, e1.turn, e1.cancel, e1.player1, e1.player2, gameId],(err) => {
             if (err) return console.log(err.message)
-        })
-    }
+        })};
+
+    if (1 === example) { exec(e1); }
+    else if ( 2 === example) { exec(e2); }
+
     res.json({ "ok": 1 })
 })
 
