@@ -287,9 +287,22 @@ app.get("/debugDB", (req, res) => {
     })
 })
 
+
 app.get("/exampleDB", (req, res) => {
     // ?tableId=70&example=2
-    const example1 = { "boardStr": "1111111101111111111111112111111122121111212222112222222122222220", "player": 1, "winner": 0, "moveStr": "0000000000000000000000000000000000000000000000000000000000000001", "turn": 59, "cancel": 0, "player1": 1, "player2": 2 };
+    const gameId = Number(req.query.tableId);
+    const example = Number(req.query.example);
+
+    const e1 = { "boardStr": "1111111101111111111111112111111122121111212222112222222122222220", "player": 1, "winner": 0, "moveStr": "0000000000000000000000000000000000000000000000000000000000000001", "turn": 59, "cancel": 0, "player1": 1, "player2": 2 };
+
+    const sql = `UPDATE game SET boardStr = ?, player = ?, winner = ?, moveStr = ?, turn = ?, cancel = ?, player1 = ?, player2 = ? WHERE gameid = ?`
+
+    if (example == 1) {
+        db.run(sql,[e1.boardStr, e1.player, e1.winner, e1.moveStr, e1.turn, e1.cancel, e1.player1, e1.player2, gameId],(err) => {
+            if (err) return console.log(err.message)
+        })
+    }
+    res.json({ "ok": 1 })
 })
 
 

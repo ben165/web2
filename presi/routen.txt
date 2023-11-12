@@ -1,0 +1,39 @@
+/enter (get)
+{
+	"tableId": int,
+	"username": string
+}
+
+/gameinfo (get)
+{
+	"tableId": int,
+	"userId": int,
+	
+}
+
+{
+	turn,
+	player,
+	boardStr,
+	cancel,
+	online,
+	opponent,
+	color
+}
+
+/makeMove (post)
+{
+	
+}
+
+
+/cancel (post)
+{
+	"player": 1|2,
+	"tableId": int
+}
+
+
+/resetDB (get)
+
+
