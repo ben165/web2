@@ -16,25 +16,22 @@ app.use((req, res, next) => {
 app.use(express.static('dist')) // static folder
 app.use(express.urlencoded({ extended: true })) // post request
 app.use(express.json()) // allow json requests
-//app.use(cors()); // TODO: Rausnehmen beim deployen
+//app.use(cors());
 
 const emptyBoardStr = "0000000000000000000000000001200000021000000000000000000000000000";
 const SEC10 = 10000;
 
+
 function online(time) {
     return (time + SEC10 >= Date.now());
 }
+
 
 // DATABASE
 const db = new sqlite3.Database('./game.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) { return console.error(err.message) }
 })
 
-// TODO remove route
-app.get("/create", (req, res) => {
-    clearDatabase(1);
-    res.json({ title: 'Info', info: 'Empty Game field created' })
-})
 
 function clearDatabase(tableId) {
     // Duplicate 2
@@ -44,12 +41,14 @@ function clearDatabase(tableId) {
     db.run(sql2, replace, (err) => { if (err) { return console.log(err.message) } })
 }
 
+
 function restartGame(tableId, player1) { // player1 ist Farbe von Spieler 1
     const state = new State(1, 1, emptyBoardStr);
     const sql2 = `UPDATE game SET boardStr = ?, player = ?, winner = ?, moveStr = ?, turn = ?, cancel = ?, player1 = ?, player2 = ? WHERE gameid = ?`
     const replace = [state.boardStr, state.player, state.winner, state.moveStr(), state.turn, 0, otherPlayer(player1), player1, tableId]
     db.run(sql2, replace, (err) => { if (err) return console.log(err.message) })
 }
+
 
 function randomId() {
     let r = 0;
@@ -58,6 +57,7 @@ function randomId() {
     }
     return r;
 }
+
 
 function registerRowPlayerDB(tableId, n, id, time, username) {
     db.serialize(() => {
@@ -76,15 +76,17 @@ function registerRowPlayerDB(tableId, n, id, time, username) {
     });
 }
 
+
 function registerPlayerDB(tableId, n, id, time, username) {
     // Duplicate3
     const sql3 = `UPDATE game SET id${n} = ?, time${n} = ?, name${n} = ? WHERE gameid = ?`;
     db.run(sql3, [id, time, username, tableId], (err) => { if (err) { return console.log(err.message) } })
 }
 
+
 app.get("/enter", (req, res) => {
     try {
-        const tableId = Number(req.query.tableId); // TODO parse tableId
+        const tableId = Number(req.query.tableId);
         const username = req.query.username;
         const sql = `Select time1, time2 from game WHERE gameid = ?`;
         db.all(sql, [tableId], (err, rows) => {
@@ -113,21 +115,10 @@ app.get("/enter", (req, res) => {
         res.json({ userId: -100 })
     }
     return;
-    // /enter?tableId=${tableIdStr}&username=${username}
-    // response: 
-    // {
-    //     userId: 1238901672381298 (random number > 0 im Erfolgsfall sonst, -1 falls boardId belegt, -10 sonst)
-    // }
 })
 
 
-// TODO id1, id2 senden statt 1, 2
 app.post("/cancel", (req, res) => {
-    /*{
-        player: 1|2
-        tableId: 2342323
-    }*/
-
     const playerId = req.body.player;
     const tableId = req.body.tableId;
     const sql = `Select cancel, player1 from game WHERE gameid = ?`
@@ -148,11 +139,6 @@ app.post("/cancel", (req, res) => {
             res.json({ cancel: cancelDB })
         })
     })
-    //cancel in db:
-    //00 = init state
-    //01 = player 1 want to quit
-    //10 = player 2 want to quit
-    //11 = both players want to quit, run route /create
 })
 
 
@@ -179,7 +165,6 @@ app.get("/resetDB", (req, res) => {
     	PRIMARY KEY("id")
     );`
 
-    // Create one playing field with gameid = 1
     const sql3 = `insert into game (gameid) values (?)`
     db.run(sql1, [], (err) => {
         if (err) { return console.log(err.message) }
@@ -190,8 +175,6 @@ app.get("/resetDB", (req, res) => {
     })
 
 })
-
-
 
 
 app.get("/gameinfo", (req, res) => {
@@ -233,15 +216,8 @@ app.get("/gameinfo", (req, res) => {
     })
 })
 
-// TODO player durch id ersetzen
+
 app.post("/makeMove", (req, res) => {
-
-    /*{
-        "player": 1,
-        "move": 30,
-        "tableId": 234521
-    }*/
-
     const playerMove = req.body.move;
     const playerId = req.body.player;
     const tableId = req.body.tableId;
@@ -273,7 +249,6 @@ app.post("/makeMove", (req, res) => {
 })
 
 
-
 app.get("/debugDB", (req, res) => {
 
     const gameId = Number(req.query.gameId);
@@ -289,12 +264,10 @@ app.get("/debugDB", (req, res) => {
 
 
 app.get("/exampleDB", (req, res) => {
-    // ?tableId=70&example=2
     const gameId = Number(req.query.tableId);
     const example = Number(req.query.example);
 
     const e1 = { "boardStr": "1111111101111111111111112111111122121111212222112222222122222220", "player": 1, "winner": 0, "moveStr": "0000000000000000000000000000000000000000000000000000000000000001", "turn": 59, "cancel": 0, "player1": 1, "player2": 2 };
-
     const sql = `UPDATE game SET boardStr = ?, player = ?, winner = ?, moveStr = ?, turn = ?, cancel = ?, player1 = ?, player2 = ? WHERE gameid = ?`
 
     if (example == 1) {
@@ -306,14 +279,9 @@ app.get("/exampleDB", (req, res) => {
 })
 
 
-
-
 app.use((req, res) => {
     res.status(404).send("<h2>Error</h2><p>Page not found</p>")
 })
-
-
-
 
 
 app.listen(3000)
