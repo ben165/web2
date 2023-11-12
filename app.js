@@ -3,24 +3,23 @@
 import { State, otherPlayer } from './helper.js';
 import sqlite3 from 'sqlite3';
 import express from 'express'
-import cors from 'cors';
+//import cors from 'cors';
 const app = express();
 
-var debugDB = {};
+let debugDB = {};
 
 // MIDDLEWARE
 app.use((req, res, next) => {
     console.log(req.hostname, req.path, req.method) // debugging
     next()
 })
-app.use(express.static('static')) // static folder
+app.use(express.static('dist')) // static folder
 app.use(express.urlencoded({ extended: true })) // post request
 app.use(express.json()) // allow json requests
-app.use(cors()); // TODO: Rausnehmen beim deployen
+//app.use(cors()); // TODO: Rausnehmen beim deployen
 
 const emptyBoardStr = "0000000000000000000000000001200000021000000000000000000000000000";
 const SEC10 = 10000;
-
 
 function online(time) {
     return (time + SEC10 >= Date.now());
@@ -42,10 +41,10 @@ function clearDatabase(tableId) {
     const state = new State(1, 1, emptyBoardStr);
     const sql2 = `UPDATE game SET boardStr = ?, player = ?, winner = ?, moveStr = ?, turn = ?, cancel = ?, player1 = ?, player2 = ?, id1 = ?, id2 = ?, time1 = ?, time2 = ?, name1 = ?, name2 = ? WHERE gameid = ?`
     const replace = [state.boardStr, state.player, state.winner, state.moveStr(), state.turn, 0, 1, 2, 0, 0, 0, 0, "", "", tableId]
-    db.run(sql2, replace, (err) => { if (err) return console.log(err.message) })
+    db.run(sql2, replace, (err) => { if (err) { return console.log(err.message) } })
 }
 
-function restartGame(tableId, player1) {
+function restartGame(tableId, player1) { // player1 ist Farbe von Spieler 1
     const state = new State(1, 1, emptyBoardStr);
     const sql2 = `UPDATE game SET boardStr = ?, player = ?, winner = ?, moveStr = ?, turn = ?, cancel = ?, player1 = ?, player2 = ? WHERE gameid = ?`
     const replace = [state.boardStr, state.player, state.winner, state.moveStr(), state.turn, 0, otherPlayer(player1), player1, tableId]
@@ -93,22 +92,18 @@ app.get("/enter", (req, res) => {
             if (err) {
                 res.json({ userId: -10 })
             } else if (rows.length === 0) {
-                console.log(0, id);
                 registerRowPlayerDB(tableId, 1, id, Date.now(), username);
                 res.json({ userId: id });
             } else {
                 rows.forEach(row => {
                     const now = Date.now();
                     if (!online(row.time1)) {
-                        console.log(1, id);
                         registerPlayerDB(tableId, 1, id, Date.now(), username);
                         res.json({ userId: id });
                     } else if (!online(row.time2)) {
-                        console.log(2, id);
                         registerPlayerDB(tableId, 2, id, Date.now(), username);
                         res.json({ userId: id });
                     } else {
-                        console.log(3, id);
                         res.json({ userId: -1 });
                     }
                 })
@@ -139,7 +134,6 @@ app.post("/cancel", (req, res) => {
     db.all(sql, [tableId], (err, rows) => {
         if (err) { return res.json({ "status": 0 }) }
         rows.forEach(row => {
-            console.log(playerId, tableId)
             let cancelDB = row.cancel
             cancelDB |= playerId
             if (cancelDB === 3) {
@@ -226,7 +220,6 @@ app.get("/gameinfo", (req, res) => {
                 db.run(sql2, [now, tableId]);
                 onlineStatus = online(row.time1);
             }
-            //console.log(userId, row.id1, row.id2, onlineStatus, opponent, color);
             return res.json({
                 turn: row.turn,
                 player: row.player,
@@ -252,7 +245,6 @@ app.post("/makeMove", (req, res) => {
     const playerMove = req.body.move;
     const playerId = req.body.player;
     const tableId = req.body.tableId;
-    console.log(tableId, playerId, playerMove)
     const sql = `select boardStr, moveStr, player, turn from game where gameid = ?`
     db.all(sql, [tableId], (err, rows) => {
         if (err) return console.log(err.message)
@@ -293,6 +285,11 @@ app.get("/debugDB", (req, res) => {
         })
         res.json(debugDB)
     })
+})
+
+app.get("/exampleDB", (req, res) => {
+    // ?tableId=70&example=2
+    const example1 = { "boardStr": "1111111101111111111111112111111122121111212222112222222122222220", "player": 1, "winner": 0, "moveStr": "0000000000000000000000000000000000000000000000000000000000000001", "turn": 59, "cancel": 0, "player1": 1, "player2": 2 };
 })
 
 
