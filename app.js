@@ -3,7 +3,7 @@
 import { State, otherPlayer } from './helper.js';
 import sqlite3 from 'sqlite3';
 import express from 'express'
-import cors from 'cors'; //so 127.0.0.1 and localhost is working
+//import cors from 'cors';
 const app = express();
 
 let debugDB = {};
@@ -16,7 +16,7 @@ app.use((req, res, next) => {
 app.use(express.static('dist')) // static folder
 app.use(express.urlencoded({ extended: true })) // post request
 app.use(express.json()) // allow json requests
-app.use(cors());
+//app.use(cors());
 
 const emptyBoardStr = "0000000000000000000000000001200000021000000000000000000000000000";
 const SEC10 = 10000;
