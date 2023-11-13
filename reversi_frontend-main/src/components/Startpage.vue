@@ -28,7 +28,7 @@ function requestEnter() {
         })
     }
     if (inputValid) {
-        axios.get(`http://localhost:3000/enter?tableId=${tableIdStr.value}&username=${username.value}`)
+        axios.get(`/enter?tableId=${tableIdStr.value}&username=${username.value}`)
             .then((res) => {
                 let userId = res.data.userId;
                 if (userId === -1) {

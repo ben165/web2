@@ -41,7 +41,7 @@ let current: Ref<BoardElement> = ref(imaginaryBoardElement);
 let intervallId: number = 0;
 function poll() {
     intervallId = setInterval(
-        () => axios.get(`http://localhost:3000/gameinfo?tableId=${tableId}&userId=${userId}`)
+        () => axios.get(`/gameinfo?tableId=${tableId}&userId=${userId}`)
             .then((res) => {
                 state.update(res.data.turn, res.data.player, res.data.boardStr);
                 updateData(res.data.opponent, res.data.online);
@@ -60,7 +60,7 @@ function move(elm: BoardElement) {
             move: elm.getIndex(),
             tableId: tableId
         };
-        axios.post('http://localhost:3000/makeMove', body);
+        axios.post('/makeMove', body);
     }
 }
 
@@ -128,13 +128,13 @@ function restart2() {
         message: 'Your opponent wants to restart. Do you agree?',
         position: 'top',
         accept: () => {
-            axios.post("http://localhost:3000/cancel", {
+            axios.post("/cancel", {
                 player: player,
                 tableId: tableId,
             });
         },
         reject: () => {
-            axios.post("http://localhost:3000/cancel", {
+            axios.post("/cancel", {
                 player: Number(StoneColor.EMPTY),
                 tableId: tableId,
             });
@@ -147,7 +147,7 @@ function restart() {
         message: 'Are you sure you want to starte a new game?',
         position: 'top',
         accept: () => {
-            axios.post("http://localhost:3000/cancel", {
+            axios.post("/cancel", {
                 player: player,
                 tableId: tableId,
             });
